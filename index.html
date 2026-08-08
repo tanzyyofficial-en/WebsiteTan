@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Anonim</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #0b141a; color: #e9edef; display: flex; justify-content: center; height: 100vh; }
+    
+    .chat-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; height: 100%; background-color: #0b141a; }
+    
+    /* Header */
+    .header { background-color: #202c33; padding: 10px 15px; display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-weight: 600; font-size: 15px; color: #e9edef; }
+    .user-status { font-size: 12px; color: #8696a0; margin-top: 2px; }
+
+    /* Announcement Banner */
+    .notice-banner { background-color: #182229; color: #8696a0; font-size: 12px; padding: 8px 12px; text-align: center; margin: 10px 12px 0; border-radius: 8px; border: 1px solid #222d34; }
+
+    /* Area Chat */
+    .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .message { max-width: 80%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.4; word-wrap: break-word; position: relative; }
+    .message.received { background-color: #202c33; align-self: flex-start; border-top-left-radius: 0; }
+    .message.sent { background-color: #005c4b; align-self: flex-end; border-top-right-radius: 0; }
+    .time { font-size: 10px; color: #8696a0; margin-top: 4px; float: right; margin-left: 10px; }
+
+    /* Input Chat */
+    .input-area { background-color: #202c33; padding: 10px; display: flex; align-items: center; gap: 10px; }
+    .input-area input { flex: 1; background-color: #2a3942; border: none; outline: none; color: #e9edef; padding: 12px 16px; border-radius: 8px; font-size: 14px; }
+    .send-btn { background-color: #00a884; border: none; width: 42px; height: 42px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .send-btn:hover { background-color: #008f70; }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <!-- Header Profil Kamu -->
+  <div class="header">
+    <img src="https://i.ibb.co.com/cKvrVqnC/1779007992605.png" alt="Avatar" class="avatar" id="profile-img">
+    <div class="user-info">
+      <span class="user-name" id="profile-name">Sultan Website (+6281919363625)</span>
+      <span class="user-status">terakhir dilihat hari ini pukul 06:06</span>
+    </div>
+  </div>
+
+  <!-- Pengumuman Status -->
+  <div class="notice-banner">
+    Kalo statusnya online tapi slow respond = ketiduran.
+  </div>
+
+  <!-- Isi Chat -->
+  <div class="chat-box" id="chatBox">
+    <!-- Chat akan muncul secara otomatis di sini -->
+  </div>
+
+  <!-- Form Kirim Pesan -->
+  <div class="input-area">
+    <input type="text" id="messageInput" placeholder="Ketik pesan..." onkeypress="handleKeyPress(event)">
+    <button class="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {  databaseURL: "https://tannop-a6595-default-rtdb.firebaseio.com",
+
+    apiKey: "AIzaSyAtBdFjls2BakeQS3nxzocpdCdBMHT8IWg",
+    authDomain: "tannop-a6595.firebaseapp.com",
+    projectId: "tannop-a6595",
+    storageBucket: "tannop-a6595.firebasestorage.app",
+    messagingSenderId: "982755504714",
+    appId: "1:982755504714:web:d4edd52d01aabf5a312cb3",
+    measurementId: "G-37Z6PJVHJW"
+  };
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+  // ID Unik untuk Pengunjung Web ini
+  let visitorId = localStorage.getItem('visitor_id');
+  if (!visitorId) {
+    visitorId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('visitor_id', visitorId);
+  }
+
+  const chatBox = document.getElementById('chatBox');
+
+  // Load Pesan Realtime
+  db.ref('chats/' + visitorId).on('child_added', (snapshot) => {
+    const data = snapshot.val();
+    displayMessage(data.text, data.sender === visitorId ? 'sent' : 'received', data.time);
+  });
+
+  function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Simpan ke Database
+    db.ref('chats/' + visitorId).push({
+      sender: visitorId,
+      text: text,
+      time: time,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    input.value = '';
+  }
+
+  function displayMessage(text, type, time) {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message', type);
+    msgDiv.innerHTML = `${text} <span class="time">${time}</span>`;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function handleKeyPress(e) {
+    if (e.key === 'Enter') sendMessage();
+  }
+</script>
+
+</body>
+</html>
