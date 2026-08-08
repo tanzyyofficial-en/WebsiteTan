@@ -11,7 +11,7 @@
     .chat-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; height: 100%; background-color: #0b141a; }
     
     /* Header */
-    .header { background-color: #202c33; padding: 10px 15px; display: flex; align-items: center; gap: 12px; }
+    .header { background-color: #202c33; padding: 10px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
     .user-info { display: flex; flex-direction: column; }
     .user-name { font-weight: 600; font-size: 15px; color: #e9edef; }
@@ -19,6 +19,11 @@
 
     /* Announcement Banner */
     .notice-banner { background-color: #182229; color: #8696a0; font-size: 12px; padding: 8px 12px; text-align: center; margin: 10px 12px 0; border-radius: 8px; border: 1px solid #222d34; }
+
+    /* Admin Selector Bar */
+    .admin-bar { background-color: #111b21; padding: 8px 12px; display: none; gap: 8px; align-items: center; border-bottom: 1px solid #222d34; }
+    .admin-bar select { flex: 1; background-color: #2a3942; color: #e9edef; border: none; padding: 6px 10px; border-radius: 6px; outline: none; }
+    .admin-badge { background-color: #00a884; color: white; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
     /* Area Chat */
     .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
@@ -37,13 +42,21 @@
 <body>
 
 <div class="chat-container">
-  <!-- Header Profil Kamu -->
-  <div class="header">
+  <!-- Header Profil Kamu (Klik Nama untuk Masuk Mode Admin) -->
+  <div class="header" onclick="toggleAdminMode()">
     <img src="https://i.ibb.co.com/cKvrVqnC/1779007992605.png" alt="Avatar" class="avatar" id="profile-img">
     <div class="user-info">
       <span class="user-name" id="profile-name">Sultan Website (+6281919363625)</span>
-      <span class="user-status">terakhir dilihat hari ini pukul 06:06</span>
+      <span class="user-status" id="user-status-text">terakhir dilihat hari ini pukul 06:06</span>
     </div>
+  </div>
+
+  <!-- Baris Pilihan Admin (Hanya Muncul di Mode Admin) -->
+  <div class="admin-bar" id="adminBar">
+    <span class="admin-badge">ADMIN</span>
+    <select id="userSelect" onchange="switchUserChat(this.value)">
+      <option value="">Pilih Pengirim Pesan...</option>
+    </select>
   </div>
 
   <!-- Pengumuman Status -->
@@ -70,8 +83,8 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-  const firebaseConfig = {  databaseURL: "https://tannop-a6595-default-rtdb.firebaseio.com",
-
+  const firebaseConfig = {
+    databaseURL: "https://tannop-a6595-default-rtdb.firebaseio.com",
     apiKey: "AIzaSyAtBdFjls2BakeQS3nxzocpdCdBMHT8IWg",
     authDomain: "tannop-a6595.firebaseapp.com",
     projectId: "tannop-a6595",
@@ -81,23 +94,81 @@
     measurementId: "G-37Z6PJVHJW"
   };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  // ID Unik untuk Pengunjung Web ini
+  // Mode & Identitas
+  let isAdmin = false;
   let visitorId = localStorage.getItem('visitor_id');
   if (!visitorId) {
     visitorId = 'user_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('visitor_id', visitorId);
   }
 
+  let activeChatId = visitorId; // Chat ID yang sedang dibuka
   const chatBox = document.getElementById('chatBox');
 
-  // Load Pesan Realtime
-  db.ref('chats/' + visitorId).on('child_added', (snapshot) => {
-    const data = snapshot.val();
-    displayMessage(data.text, data.sender === visitorId ? 'sent' : 'received', data.time);
-  });
+  // Muat Pesan Pertama Kali
+  loadChat(activeChatId);
+
+  // Fungsi Aktifkan/Matikan Mode Admin
+  function toggleAdminMode() {
+    const password = prompt("Masukkan kata sandi Admin:")
+    if (password === 'nng') {
+      isAdmin = true;
+      document.getElementById('adminBar').style.display = 'flex';
+      document.getElementById('user-status-text').innerText = 'Mode Admin Aktif';
+      alert("Selamat datang Admin! Pilih user di bagian atas untuk membalas pesan.");
+      listenForUsers();
+    } else if (password !== null) {
+      alert("Password salah!");
+    }
+  }
+
+  // Mendapatkan daftar semua pengguna yang pernah kirim pesan
+  function listenForUsers() {
+    db.ref('chats').on('value', (snapshot) => {
+      const select = document.getElementById('userSelect');
+      select.innerHTML = '<option value="">-- Pilih Chat User --</option>';
+      snapshot.forEach((childSnapshot) => {
+        const uid = childSnapshot.key;
+        const option = document.createElement('option');
+        option.value = uid;
+        option.innerText = uid === visitorId ? uid + ' (HP Ini)' : uid;
+        if (uid === activeChatId) option.selected = true;
+        select.appendChild(option);
+      });
+    });
+  }
+
+  // Mengganti Chat ke User lain (Khusus Admin)
+  function switchUserChat(uid) {
+    if (!uid) return;
+    activeChatId = uid;
+    loadChat(activeChatId);
+  }
+
+  // Load Pesan Realtime sesuai ID
+  function loadChat(targetUid) {
+    chatBox.innerHTML = '';
+    db.ref('chats/' + targetUid).off(); // Matikan listener lama
+    
+    db.ref('chats/' + targetUid).on('child_added', (snapshot) => {
+      const data = snapshot.val();
+      
+      // Pengondisian warna pesan
+      let messageType = 'received';
+      if (!isAdmin) {
+        // Mode Pengunjung: Pesan sendiri di kanan, balasan admin di kiri
+        messageType = (data.sender === visitorId) ? 'sent' : 'received';
+      } else {
+        // Mode Admin: Balasan admin di kanan, pesan user di kiri
+        messageType = (data.sender === 'admin') ? 'sent' : 'received';
+      }
+
+      displayMessage(data.text, messageType, data.time);
+    });
+  }
 
   function sendMessage() {
     const input = document.getElementById('messageInput');
@@ -105,10 +176,11 @@ const db = firebase.database();
     if (!text) return;
 
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const senderRole = isAdmin ? 'admin' : visitorId;
 
-    // Simpan ke Database
-    db.ref('chats/' + visitorId).push({
-      sender: visitorId,
+    // Simpan ke Database Firebase
+    db.ref('chats/' + activeChatId).push({
+      sender: senderRole,
       text: text,
       time: time,
       timestamp: firebase.database.ServerValue.TIMESTAMP
