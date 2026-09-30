@@ -15,7 +15,7 @@
       display: flex; 
       flex-direction: column; 
       height: 100vh; 
-      height: 100dvh; /* Menyesuaikan layar HP modern */
+      height: 100dvh; 
       background-color: #0b141a; 
       position: relative; 
     }
@@ -32,7 +32,7 @@
     .admin-bar label { font-size: 12px; color: #00a884; font-weight: bold; }
     .admin-bar select { background: #202c33; color: #fff; border: 1px solid #2a3942; padding: 5px; border-radius: 5px; max-width: 200px; }
 
-    /* Area Chat (Hanya ini yang bisa di-scroll) */
+    /* Area Chat */
     .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .message { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.4; word-wrap: break-word; position: relative; }
     .message.sent { background-color: #005c4b; align-self: flex-end; border-top-right-radius: 0; }
@@ -40,7 +40,7 @@
     .message img { max-width: 100%; border-radius: 6px; margin-top: 4px; display: block; }
     .time { font-size: 10px; color: #8696a0; text-align: right; margin-top: 4px; display: block; }
 
-    /* Area Input Pesan (Menempel Kencang di Bawah) */
+    /* Area Input Pesan */
     .input-area { background-color: #202c33; padding: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .icon-btn { background: none; border: none; fill: #8696a0; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
     .icon-btn:hover { fill: #aebac1; }
@@ -48,7 +48,7 @@
     .send-btn { background-color: #00a884; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
     .send-btn svg { fill: #fff; width: 20px; height: 20px; }
 
-    /* Popup Sticker / Emoji Panel */
+    /* Panel Sticker / Emoji */
     .media-panel { display: none; background-color: #111b21; border-top: 1px solid #2a3942; height: 180px; padding: 10px; overflow-y: auto; flex-shrink: 0; }
     .media-tabs { display: flex; gap: 15px; border-bottom: 1px solid #2a3942; padding-bottom: 8px; margin-bottom: 10px; }
     .tab-btn { color: #8696a0; background: none; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
@@ -58,14 +58,13 @@
     .sticker-item { width: 100%; height: 60px; object-fit: contain; cursor: pointer; border-radius: 4px; }
   </style>
 
-  <!-- Firebase v8 SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
   <div class="chat-container">
-    <!-- Header Admin Toggle -->
     <div class="header" onclick="toggleAdminMode()">
       <div class="avatar">S</div>
       <div class="user-info">
@@ -74,7 +73,6 @@
       </div>
     </div>
 
-    <!-- Admin Control Bar -->
     <div class="admin-bar" id="adminBar">
       <label>MODE ADMIN</label>
       <select id="userSelect" onchange="switchChatUser(this.value)">
@@ -82,10 +80,8 @@
       </select>
     </div>
 
-    <!-- Chat Box -->
     <div class="chat-box" id="chatBox"></div>
 
-    <!-- Sticker & Emoji Panel -->
     <div class="media-panel" id="mediaPanel">
       <div class="media-tabs">
         <button class="tab-btn active" onclick="switchTab('emoji')">Emoji</button>
@@ -111,14 +107,11 @@
       </div>
     </div>
 
-    <!-- Input Bar -->
     <div class="input-area">
-      <!-- Tombol Toggle Panel Stiker/Emoji -->
       <button class="icon-btn" onclick="toggleMediaPanel()">
         <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
       </button>
 
-      <!-- Tombol Kirim Foto -->
       <label class="icon-btn" style="cursor: pointer;">
         <svg width="24" height="24" viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4s-4 1.79-4 4v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
         <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="sendImage(this)">
@@ -133,7 +126,6 @@
   </div>
 
   <script>
-    // Firebase Configuration
     const firebaseConfig = {
       databaseURL: "https://tannop-a6595-default-rtdb.firebaseio.com",
       apiKey: "AIzaSyAtBdFjls2BakeQS3nxzocpdCdBMHT8IWg",
@@ -157,7 +149,6 @@
     let isAdmin = false;
     let activeChatUser = visitorId;
 
-    // Password Admin
     function toggleAdminMode() {
       const password = prompt("Masukkan kata sandi Admin:");
       if (password === 'nng') {
@@ -229,7 +220,7 @@
 
     function sendMessage(customText = null, customImg = null) {
       const input = document.getElementById('messageInput');
-      const text = customText || input.value.trim();
+      const text = customText !== null ? customText : input.value.trim();
       
       if (!text && !customImg) return;
 
@@ -245,22 +236,20 @@
       };
 
       db.ref('messages/' + activeChatUser).push(messageData);
-      if (!customText) input.value = '';
+      if (customText === null) input.value = '';
     }
 
-    // Fitur Kirim Gambar
     function sendImage(fileInput) {
       const file = fileInput.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          sendMessage(null, e.target.result);
+          sendMessage('', e.target.result);
         };
         reader.readAsDataURL(file);
       }
     }
 
-    // Toggle Panel Stiker & Emoji
     function toggleMediaPanel() {
       const panel = document.getElementById('mediaPanel');
       panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
@@ -285,7 +274,7 @@
     }
 
     function sendSticker(stickerUrl) {
-      sendMessage(null, stickerUrl);
+      sendMessage('', stickerUrl);
       toggleMediaPanel();
     }
 
@@ -293,7 +282,9 @@
       if (e.key === 'Enter') sendMessage();
     }
 
+    // Jalankan pemuatan pesan secara langsung
     loadMessages();
   </script>
 </body>
-</html>
+          </html>
+  
