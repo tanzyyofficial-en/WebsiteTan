@@ -32,7 +32,7 @@
     .admin-bar label { font-size: 12px; color: #00a884; font-weight: bold; }
     .admin-bar select { background: #202c33; color: #fff; border: 1px solid #2a3942; padding: 5px; border-radius: 5px; max-width: 200px; }
 
-    /* Area Chat dengan Wallpaper */
+    /* Area Chat & Wallpaper */
 .chat-box { 
   flex: 1; 
   padding: 15px; 
@@ -41,12 +41,40 @@
   flex-direction: column; 
   gap: 10px; 
   
-  /* Isikan nama file yang terupload di GitHub */
-  background-image: linear-gradient(rgba(11, 20, 26, 0.6), rgba(11, 20, 26, 0.6)), url('c82933499ec2df8cd9d59c40717e931e (1).jpg'); 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  /* Wallpaper kucing dengan lapisan gelap */
+  background-image: linear-gradient(rgba(11, 20, 26, 0.7), rgba(11, 20, 26, 0.7)), url('c82933499ec2df8cd9d59c40717e931e (1).jpg'); 
+  background-size: contain;         /* Agar seluruh badan kucing kelihatan utuh */
+  background-position: center;      /* Gambar di tengah */
+  background-repeat: no-repeat;     /* Tidak mengulang */
+  background-color: #0b141a;        /* Latar belakang gelap */
 }
+
+/* Balon Pesan (Agar teks kelihatan jelas & punya kotak) */
+.message { 
+  max-width: 75%; 
+  padding: 8px 12px; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  line-height: 1.4; 
+  word-wrap: break-word; 
+  position: relative; 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.message.sent { 
+  background-color: #005c4b !important; /* Warna hijau WA untuk pesan terkirim */
+  color: #e9edef;
+  align-self: flex-end; 
+  border-top-right-radius: 0; 
+}
+
+.message.received { 
+  background-color: #202c33 !important; /* Warna abu-abu WA untuk pesan diterima */
+  color: #e9edef;
+  align-self: flex-start; 
+  border-top-left-radius: 0; 
+}
+    
     
     
     /* Area Input Pesan */
