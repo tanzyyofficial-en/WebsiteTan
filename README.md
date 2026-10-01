@@ -1,2 +1,2 @@
-# WebsiteTan
+# Example Website
 Semoga berhasil
