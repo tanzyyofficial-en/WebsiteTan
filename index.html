@@ -32,14 +32,22 @@
     .admin-bar label { font-size: 12px; color: #00a884; font-weight: bold; }
     .admin-bar select { background: #202c33; color: #fff; border: 1px solid #2a3942; padding: 5px; border-radius: 5px; max-width: 200px; }
 
-    /* Area Chat */
-    .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .message { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.4; word-wrap: break-word; position: relative; }
-    .message.sent { background-color: #005c4b; align-self: flex-end; border-top-right-radius: 0; }
-    .message.received { background-color: #202c33; align-self: flex-start; border-top-left-radius: 0; }
-    .message img { max-width: 100%; border-radius: 6px; margin-top: 4px; display: block; }
-    .time { font-size: 10px; color: #8696a0; text-align: right; margin-top: 4px; display: block; }
-
+    /* Area Chat dengan Wallpaper Kucing */
+.chat-box { 
+  flex: 1; 
+  padding: 15px; 
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  
+  /* Link Gambar Kucing Kamu Ditambahkan Di Sini */https://i.ibb.co/nsmp5xnP/314.jpg
+  background-image: linear-gradient(rgba(11, 20, 26, 0.75), rgba(11, 20, 26, 0.75)), url('https://i.ibb.co/nsmp5xnP/314.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+    
     /* Area Input Pesan */
     .input-area { background-color: #202c33; padding: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .icon-btn { background: none; border: none; fill: #8696a0; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
